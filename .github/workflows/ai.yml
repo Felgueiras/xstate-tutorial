@@ -1,0 +1,20 @@
+name: "AI inference"
+on:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  inference:
+    permissions:
+      models: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Local Action
+        id: inference
+        uses: actions/ai-inference@v1
+        with:
+          prompt: "Hello!"
+
+      - name: Print Output
+        id: output
+        run: echo "${{ steps.inference.outputs.response }}"
