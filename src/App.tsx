@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useMachine } from "@xstate/react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 
-import { createActor, createMachine } from "xstate";
+import { createMachine } from "xstate";
 
 const toggleMachine = createMachine({
   id: "toggle",
@@ -19,24 +19,8 @@ const toggleMachine = createMachine({
   },
 });
 
-// Create an actor that you can send events to.
-// Note: the actor is not started yet!
-const actor = createActor(toggleMachine);
-
-// Subscribe to snapshots (emitted state changes) from the actor
-actor.subscribe((snapshot) => {
-  console.log("Value:", snapshot.value);
-});
-
-// Start the actor
-actor.start(); // logs 'Inactive'
-
-// Send events
-actor.send({ type: "toggle" }); // logs 'Active'
-actor.send({ type: "toggle" }); // logs 'Inactive'
-
 function App() {
-  const [count, setCount] = useState(0);
+  const [state, send] = useMachine(toggleMachine);
 
   return (
     <>
@@ -48,17 +32,31 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>XState Toggle Demo</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button
+          onClick={() => send({ type: "toggle" })}
+          style={{
+            backgroundColor: state.matches("Active") ? "#4CAF50" : "#f44336",
+            color: "white",
+            padding: "20px 40px",
+            fontSize: "18px",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+          }}
+        >
+          Status: {state.value as string}
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+        <p style={{ marginTop: "20px" }}>
+          {state.matches("Active")
+            ? "⏱️ Will auto-reset to Inactive in 2 seconds"
+            : "Click to activate"}
         </p>
       </div>
       <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+        Click the button to toggle between Active and Inactive states
       </p>
     </>
   );
